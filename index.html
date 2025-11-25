@@ -408,7 +408,7 @@
                             </div>
                         </div>
                         
-                        <div class="card">
+                        <div class="card mb-4">
                             <div class="card-header">
                                 زیادکردنی قوتابی
                             </div>
@@ -477,6 +477,31 @@
                                     
                                     <button type="submit" class="btn btn-primary">زیادکردنی قوتابی</button>
                                 </form>
+                            </div>
+                        </div>
+                        
+                        <!-- لیستی قوتابیان -->
+                        <div class="card">
+                            <div class="card-header">
+                                لیستی هەموو قوتابیان
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>ناو</th>
+                                                <th>ناوی باوک</th>
+                                                <th>قۆناغ</th>
+                                                <th>گروپ</th>
+                                                <th>کردارەکان</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="studentsList">
+                                            <!-- لیستی قوتابیان لێرە زیاد دەکرێت -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -757,6 +782,8 @@
         let grades = JSON.parse(localStorage.getItem('grades')) || [];
         let attendance = JSON.parse(localStorage.getItem('attendance')) || [];
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let editingStudentId = null;
+        let editingGradeId = null;
         
         // پاسوۆردی سەرەکی
         const systemPassword = "ashna1212";
@@ -766,6 +793,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             if (currentUser) {
                 showMainPage();
+                displayStudentsList();
             } else {
                 showLoginPage();
             }
@@ -800,6 +828,7 @@
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 document.getElementById('userName').textContent = username;
                 showMainPage();
+                displayStudentsList();
             } else {
                 alert('ناوی بەکارهێنەر یان پاسوۆرد هەڵەیە!');
             }
@@ -836,6 +865,7 @@
                     break;
                 case 'studentsSection':
                     activeLink = document.querySelector('a[href="#"][onclick="showSection(\'studentsSection\')"]');
+                    displayStudentsList();
                     break;
                 case 'gradesSection':
                     activeLink = document.querySelector('a[href="#"][onclick="showSection(\'gradesSection\')"]');
@@ -861,13 +891,21 @@
             // زیادکردنی قوتابی
             document.getElementById('addStudentForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                addStudent();
+                if (editingStudentId) {
+                    updateStudent(editingStudentId);
+                } else {
+                    addStudent();
+                }
             });
             
             // زیادکردنی نمرە
             document.getElementById('addGradeForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                addGrade();
+                if (editingGradeId) {
+                    updateGrade(editingGradeId);
+                } else {
+                    addGrade();
+                }
             });
             
             // زیادکردنی غیاب
@@ -902,6 +940,123 @@
             
             // خۆکارکردنی کۆکردنەوەی نمرە
             setupGradeCalculation();
+        }
+        
+        // فەنکشنی نوێ بۆ نیشاندانی لیستی قوتابیان
+        function displayStudentsList() {
+            const studentsList = document.getElementById('studentsList');
+            studentsList.innerHTML = '';
+
+            if (students.length === 0) {
+                studentsList.innerHTML = '<tr><td colspan="5" class="text-center">هیچ قوتابیەک تۆمار نەکراوە</td></tr>';
+                return;
+            }
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.fatherName}</td>
+                    <td>قۆناغی ${student.level}</td>
+                    <td>${student.group}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" onclick="editStudent('${student.id}')">
+                            <i class="fas fa-edit"></i> گۆڕانکاری
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteStudent('${student.id}')">
+                            <i class="fas fa-trash"></i> سڕینەوە
+                        </button>
+                    </td>
+                `;
+                studentsList.appendChild(row);
+            });
+        }
+
+        // فەنکشنی گۆڕانکاری قوتابی
+        function editStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            // پڕکردنەوەی فۆرم بە زانیاری قوتابی
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('fatherName').value = student.fatherName;
+            document.getElementById('grandfatherName').value = student.grandfatherName;
+            document.getElementById('studentAge').value = student.age;
+            document.getElementById('studentPhone').value = student.phone || '';
+            document.getElementById('fatherPhone').value = student.fatherPhone || '';
+            document.getElementById('studentGroup').value = student.group;
+            document.getElementById('studentLevel').value = student.level;
+
+            // گۆڕینی دەقەی دووگمەی زیادکردن
+            const submitBtn = document.querySelector('#addStudentForm button[type="submit"]');
+            submitBtn.textContent = 'نوێکردنەوەی قوتابی';
+            editingStudentId = studentId;
+        }
+
+        // فەنکشنی نوێکردنەوەی قوتابی
+        function updateStudent(studentId) {
+            const studentIndex = students.findIndex(s => s.id === studentId);
+            if (studentIndex === -1) return;
+
+            students[studentIndex] = {
+                ...students[studentIndex],
+                name: document.getElementById('studentName').value,
+                fatherName: document.getElementById('fatherName').value,
+                grandfatherName: document.getElementById('grandfatherName').value,
+                age: document.getElementById('studentAge').value,
+                phone: document.getElementById('studentPhone').value,
+                fatherPhone: document.getElementById('fatherPhone').value,
+                group: document.getElementById('studentGroup').value,
+                level: document.getElementById('studentLevel').value
+            };
+
+            // خوێندنەوەی وێنەی نوێ ئەگەر هەیە
+            const photoInput = document.getElementById('studentPhoto');
+            if (photoInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    students[studentIndex].photo = e.target.result;
+                    saveStudentsAndRefresh();
+                };
+                reader.readAsDataURL(photoInput.files[0]);
+            } else {
+                saveStudentsAndRefresh();
+            }
+        }
+
+        // فەنکشنی سڕینەوەی قوتابی
+        function deleteStudent(studentId) {
+            if (!confirm('دڵنیایت دەتەوێت ئەم قوتابیە بسڕیتەوە؟')) {
+                return;
+            }
+
+            // سڕینەوەی قوتابی
+            students = students.filter(s => s.id !== studentId);
+            
+            // سڕینەوەی هەموو نمرەکانی قوتابی
+            grades = grades.filter(g => g.studentId !== studentId);
+            
+            // سڕینەوەی هەموو غیابەکانی قوتابی
+            attendance = attendance.filter(a => a.studentId !== studentId);
+
+            saveStudentsAndRefresh();
+            alert('قوتابی بە سەرکەوتوویی سڕدرایەوە!');
+        }
+
+        // فەنکشنی پاشەکەوتکردن و نوێکردنەوە
+        function saveStudentsAndRefresh() {
+            localStorage.setItem('students', JSON.stringify(students));
+            localStorage.setItem('grades', JSON.stringify(grades));
+            localStorage.setItem('attendance', JSON.stringify(attendance));
+            
+            displayStudentsList();
+            updateDashboard();
+            
+            // ڕیسێتکردنی فۆرم
+            document.getElementById('addStudentForm').reset();
+            const submitBtn = document.querySelector('#addStudentForm button[type="submit"]');
+            submitBtn.textContent = 'زیادکردنی قوتابی';
+            editingStudentId = null;
         }
         
         // زیادکردنی قوتابی
@@ -939,6 +1094,7 @@
             localStorage.setItem('students', JSON.stringify(students));
             alert('قوتابی بە سەرکەوتوویی زیاد کرا!');
             document.getElementById('addStudentForm').reset();
+            displayStudentsList();
             updateDashboard();
         }
         
@@ -972,6 +1128,85 @@
             updateDashboard();
         }
         
+        // فەنکشنی گۆڕانکاری نمرە
+        function editGrade(gradeId) {
+            const grade = grades.find(g => g.id === gradeId);
+            if (!grade) return;
+
+            // گەڕان بەدوای قوتابی
+            document.getElementById('gradeStudentSearch').value = grade.studentName;
+            document.getElementById('gradeStudentName').value = grade.studentName;
+
+            // پڕکردنەوەی فۆرم بە زانیاری نمرە
+            document.getElementById('courseName').value = grade.courseName;
+            document.getElementById('first15Grade').value = grade.first15Grade;
+            document.getElementById('first5Grade').value = grade.first5Grade;
+            document.getElementById('second15Grade').value = grade.second15Grade;
+            document.getElementById('second5Grade').value = grade.second5Grade;
+            document.getElementById('final60Grade').value = grade.final60Grade;
+            document.getElementById('totalGrade').value = grade.totalGrade;
+
+            // گۆڕینی دەقەی دووگمەی پاشەکەوتکردن
+            const submitBtn = document.querySelector('#addGradeForm button[type="submit"]');
+            submitBtn.textContent = 'نوێکردنەوەی نمرە';
+            editingGradeId = gradeId;
+        }
+
+        // فەنکشنی نوێکردنەوەی نمرە
+        function updateGrade(gradeId) {
+            const gradeIndex = grades.findIndex(g => g.id === gradeId);
+            if (gradeIndex === -1) return;
+
+            grades[gradeIndex] = {
+                ...grades[gradeIndex],
+                courseName: document.getElementById('courseName').value,
+                first15Grade: parseFloat(document.getElementById('first15Grade').value),
+                first5Grade: parseFloat(document.getElementById('first5Grade').value),
+                second15Grade: parseFloat(document.getElementById('second15Grade').value),
+                second5Grade: parseFloat(document.getElementById('second5Grade').value),
+                final60Grade: parseFloat(document.getElementById('final60Grade').value),
+                totalGrade: parseFloat(document.getElementById('totalGrade').value)
+            };
+
+            localStorage.setItem('grades', JSON.stringify(grades));
+            alert('نمرە بە سەرکەوتوویی نوێکرایەوە!');
+            
+            // نوێکردنەوەی زانیاری قوتابی
+            const studentName = document.getElementById('studentDetailName').textContent;
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                showStudentGrades(student);
+            }
+            
+            updateDashboard();
+            
+            // ڕیسێتکردنی فۆرم
+            document.getElementById('addGradeForm').reset();
+            const submitBtn = document.querySelector('#addGradeForm button[type="submit"]');
+            submitBtn.textContent = 'خەزنکردنی نمرە';
+            editingGradeId = null;
+        }
+
+        // فەنکشنی سڕینەوەی نمرە
+        function deleteGrade(gradeId) {
+            if (!confirm('دڵنیایت دەتەوێت ئەم نمرە بسڕیتەوە؟')) {
+                return;
+            }
+
+            grades = grades.filter(g => g.id !== gradeId);
+            localStorage.setItem('grades', JSON.stringify(grades));
+            
+            // نوێکردنەوەی زانیاری قوتابی
+            const studentName = document.getElementById('studentDetailName').textContent;
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                showStudentGrades(student);
+            }
+            
+            updateDashboard();
+            alert('نمرە بە سەرکەوتوویی سڕدرایەوە!');
+        }
+        
         // زیادکردنی غیاب
         function addAttendance() {
             const studentName = document.getElementById('attendanceStudentName').value;
@@ -996,6 +1231,26 @@
             alert('غیاب بە سەرکەوتوویی تۆمار کرا!');
             document.getElementById('addAttendanceForm').reset();
             updateDashboard();
+        }
+        
+        // فەنکشنی سڕینەوەی غیاب
+        function deleteAttendance(attendanceId) {
+            if (!confirm('دڵنیایت دەتەوێت ئەم غیابە بسڕیتەوە؟')) {
+                return;
+            }
+
+            attendance = attendance.filter(a => a.id !== attendanceId);
+            localStorage.setItem('attendance', JSON.stringify(attendance));
+            
+            // نوێکردنەوەی زانیاری قوتابی
+            const studentName = document.getElementById('studentDetailName').textContent;
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                showStudentAttendance(student);
+            }
+            
+            updateDashboard();
+            alert('غیاب بە سەرکەوتوویی سڕدرایەوە!');
         }
         
         // گۆڕینی پاسوۆرد
@@ -1086,6 +1341,7 @@
                     localStorage.setItem('attendance', JSON.stringify(attendance));
                     
                     alert('بەکەپ بە سەرکەوتوویی خوێندرایەوە!');
+                    displayStudentsList();
                     updateDashboard();
                 } catch (error) {
                     alert('هەڵە لە خوێندنەوەی فایلی بەکەپ: ' + error.message);
@@ -1201,10 +1457,32 @@
             
             // نیشاندانی 5 غیابی کۆتایی
             const recentAttendance = studentAttendance.slice(-5);
-            let attendanceHTML = '<table class="table table-striped"><thead><tr><th>بەروار</th><th>دەرس</th><th>کاتژمێر</th></tr></thead><tbody>';
+            let attendanceHTML = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>بەروار</th>
+                            <th>دەرس</th>
+                            <th>کاتژمێر</th>
+                            <th>کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
             recentAttendance.forEach(a => {
-                attendanceHTML += `<tr><td>${a.date}</td><td>${a.courseName}</td><td>${a.hours}</td></tr>`;
+                attendanceHTML += `
+                    <tr>
+                        <td>${a.date}</td>
+                        <td>${a.courseName}</td>
+                        <td>${a.hours}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
             });
             
             attendanceHTML += '</tbody></table>';
@@ -1222,10 +1500,32 @@
             
             const studentAttendance = attendance.filter(a => a.studentId === student.id);
             
-            let attendanceHTML = '<table class="table table-striped"><thead><tr><th>بەروار</th><th>دەرس</th><th>کاتژمێر</th></tr></thead><tbody>';
+            let attendanceHTML = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>بەروار</th>
+                            <th>دەرس</th>
+                            <th>کاتژمێر</th>
+                            <th>کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
             studentAttendance.forEach(a => {
-                attendanceHTML += `<tr><td>${a.date}</td><td>${a.courseName}</td><td>${a.hours}</td></tr>`;
+                attendanceHTML += `
+                    <tr>
+                        <td>${a.date}</td>
+                        <td>${a.courseName}</td>
+                        <td>${a.hours}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
             });
             
             attendanceHTML += '</tbody></table>';
@@ -1243,24 +1543,120 @@
                 return;
             }
             
-            let gradesHTML = '<table class="table table-striped"><thead><tr><th>دەرس</th><th>15ی یەکەم</th><th>5ی یەکەم</th><th>15ی دووەم</th><th>5ی دووەم</th><th>کۆتایی (60)</th><th>کۆی گشتی (100)</th></tr></thead><tbody>';
+            // نیشاندانی 5 نمرەی کۆتایی
+            const recentGrades = studentGrades.slice(-5);
+            let gradesHTML = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>دەرس</th>
+                            <th>15ی یەکەم</th>
+                            <th>5ی یەکەم</th>
+                            <th>15ی دووەم</th>
+                            <th>5ی دووەم</th>
+                            <th>کۆتایی (60)</th>
+                            <th>کۆی گشتی (100)</th>
+                            <th>کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            recentGrades.forEach(g => {
+                gradesHTML += `
+                    <tr>
+                        <td>${g.courseName}</td>
+                        <td>${g.first15Grade}</td>
+                        <td>${g.first5Grade}</td>
+                        <td>${g.second15Grade}</td>
+                        <td>${g.second5Grade}</td>
+                        <td>${g.final60Grade}</td>
+                        <td>${g.totalGrade}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-1" onclick="editGrade('${g.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteGrade('${g.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            gradesHTML += '</tbody></table>';
+            
+            // زیادکردنی دووگمەی بینینی هەموو نمرەکان
+            if (studentGrades.length > 5) {
+                gradesHTML += `
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary" onclick="viewAllGrades()">
+                            بینینی هەموو نمرەکان (${studentGrades.length})
+                        </button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('gradesList').innerHTML = gradesHTML;
+            document.getElementById('studentGradesCard').style.display = 'block';
+        }
+
+        // فەنکشنی بینینی هەموو نمرەکان بۆ قوتابی
+        function viewAllGrades() {
+            const studentName = document.getElementById('studentDetailName').textContent;
+            const student = students.find(s => s.name === studentName);
+            
+            if (!student) return;
+
+            const studentGrades = grades.filter(g => g.studentId === student.id);
+            
+            if (studentGrades.length === 0) {
+                document.getElementById('gradesList').innerHTML = '<p>هیچ نمرەیەک بۆ ئەم قوتابیە تۆمار نەکراوە.</p>';
+                return;
+            }
+            
+            let gradesHTML = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>دەرس</th>
+                            <th>15ی یەکەم</th>
+                            <th>5ی یەکەم</th>
+                            <th>15ی دووەم</th>
+                            <th>5ی دووەم</th>
+                            <th>کۆتایی (60)</th>
+                            <th>کۆی گشتی (100)</th>
+                            <th>کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
             studentGrades.forEach(g => {
-                gradesHTML += `<tr>
-                    <td>${g.courseName}</td>
-                    <td>${g.first15Grade}</td>
-                    <td>${g.first5Grade}</td>
-                    <td>${g.second15Grade}</td>
-                    <td>${g.second5Grade}</td>
-                    <td>${g.final60Grade}</td>
-                    <td>${g.totalGrade}</td>
-                </tr>`;
+                gradesHTML += `
+                    <tr>
+                        <td>${g.courseName}</td>
+                        <td>${g.first15Grade}</td>
+                        <td>${g.first5Grade}</td>
+                        <td>${g.second15Grade}</td>
+                        <td>${g.second5Grade}</td>
+                        <td>${g.final60Grade}</td>
+                        <td>${g.totalGrade}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-1" onclick="editGrade('${g.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteGrade('${g.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
             });
             
             gradesHTML += '</tbody></table>';
             
             document.getElementById('gradesList').innerHTML = gradesHTML;
-            document.getElementById('studentGradesCard').style.display = 'block';
         }
         
         // ڕێکخستنی خۆکارکردنی کۆکردنەوەی نمرە
@@ -1335,48 +1731,52 @@
             });
             
             const gradesCtx = document.getElementById('gradesChart').getContext('2d');
-            new Chart(gradesCtx, {
-                type: 'bar',
-                data: {
-                    labels: levelLabels,
-                    datasets: [{
-                        label: 'نمرەی تێکڕا',
-                        data: levelAverages,
-                        backgroundColor: 'rgba(78, 115, 223, 0.5)',
-                        borderColor: 'rgba(78, 115, 223, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
+            if (gradesCtx) {
+                new Chart(gradesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: levelLabels,
+                        datasets: [{
+                            label: 'نمرەی تێکڕا',
+                            data: levelAverages,
+                            backgroundColor: 'rgba(78, 115, 223, 0.5)',
+                            borderColor: 'rgba(78, 115, 223, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
             
             // گرافی ڕێژەی غیاب
             const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-            new Chart(attendanceCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['حەضر', 'غیاب'],
-                    datasets: [{
-                        data: [85, 15], // نرخی نموونەیی
-                        backgroundColor: [
-                            'rgba(28, 200, 138, 0.5)',
-                            'rgba(231, 74, 59, 0.5)'
-                        ],
-                        borderColor: [
-                            'rgba(28, 200, 138, 1)',
-                            'rgba(231, 74, 59, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                }
-            });
+            if (attendanceCtx) {
+                new Chart(attendanceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['حەضر', 'غیاب'],
+                        datasets: [{
+                            data: [85, 15], // نرخی نموونەیی
+                            backgroundColor: [
+                                'rgba(28, 200, 138, 0.5)',
+                                'rgba(231, 74, 59, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(28, 200, 138, 1)',
+                                'rgba(231, 74, 59, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    }
+                });
+            }
         }
         
         // هەناردەکردنی نمرەکان بۆ PDF
