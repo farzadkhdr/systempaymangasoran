@@ -940,6 +940,15 @@
             
             // خۆکارکردنی کۆکردنەوەی نمرە
             setupGradeCalculation();
+            
+            // Event listener بۆ کلیلکاری لە گەڕانی قوتابی
+            document.addEventListener('click', function(e) {
+                if (!e.target.matches('#studentSearch, #gradeStudentSearch, #attendanceStudentSearch, #infoStudentSearch')) {
+                    document.querySelectorAll('.search-results').forEach(results => {
+                        results.style.display = 'none';
+                    });
+                }
+            });
         }
         
         // فەنکشنی نوێ بۆ نیشاندانی لیستی قوتابیان
@@ -1113,12 +1122,12 @@
                 studentId: student.id,
                 studentName: student.name,
                 courseName: document.getElementById('courseName').value,
-                first15Grade: parseFloat(document.getElementById('first15Grade').value),
-                first5Grade: parseFloat(document.getElementById('first5Grade').value),
-                second15Grade: parseFloat(document.getElementById('second15Grade').value),
-                second5Grade: parseFloat(document.getElementById('second5Grade').value),
-                final60Grade: parseFloat(document.getElementById('final60Grade').value),
-                totalGrade: parseFloat(document.getElementById('totalGrade').value)
+                first15Grade: parseFloat(document.getElementById('first15Grade').value) || 0,
+                first5Grade: parseFloat(document.getElementById('first5Grade').value) || 0,
+                second15Grade: parseFloat(document.getElementById('second15Grade').value) || 0,
+                second5Grade: parseFloat(document.getElementById('second5Grade').value) || 0,
+                final60Grade: parseFloat(document.getElementById('final60Grade').value) || 0,
+                totalGrade: parseFloat(document.getElementById('totalGrade').value) || 0
             };
             
             grades.push(grade);
@@ -1133,7 +1142,10 @@
             const grade = grades.find(g => g.id === gradeId);
             if (!grade) return;
 
-            // گەڕان بەدوای قوتابی
+            // گۆڕینی بەشەکە بۆ نمرەکان
+            showSection('gradesSection');
+            
+            // ڕیسێتکردنی گەڕان
             document.getElementById('gradeStudentSearch').value = grade.studentName;
             document.getElementById('gradeStudentName').value = grade.studentName;
 
@@ -1160,31 +1172,33 @@
             grades[gradeIndex] = {
                 ...grades[gradeIndex],
                 courseName: document.getElementById('courseName').value,
-                first15Grade: parseFloat(document.getElementById('first15Grade').value),
-                first5Grade: parseFloat(document.getElementById('first5Grade').value),
-                second15Grade: parseFloat(document.getElementById('second15Grade').value),
-                second5Grade: parseFloat(document.getElementById('second5Grade').value),
-                final60Grade: parseFloat(document.getElementById('final60Grade').value),
-                totalGrade: parseFloat(document.getElementById('totalGrade').value)
+                first15Grade: parseFloat(document.getElementById('first15Grade').value) || 0,
+                first5Grade: parseFloat(document.getElementById('first5Grade').value) || 0,
+                second15Grade: parseFloat(document.getElementById('second15Grade').value) || 0,
+                second5Grade: parseFloat(document.getElementById('second5Grade').value) || 0,
+                final60Grade: parseFloat(document.getElementById('final60Grade').value) || 0,
+                totalGrade: parseFloat(document.getElementById('totalGrade').value) || 0
             };
 
             localStorage.setItem('grades', JSON.stringify(grades));
             alert('نمرە بە سەرکەوتوویی نوێکرایەوە!');
-            
-            // نوێکردنەوەی زانیاری قوتابی
-            const studentName = document.getElementById('studentDetailName').textContent;
-            const student = students.find(s => s.name === studentName);
-            if (student) {
-                showStudentGrades(student);
-            }
-            
-            updateDashboard();
             
             // ڕیسێتکردنی فۆرم
             document.getElementById('addGradeForm').reset();
             const submitBtn = document.querySelector('#addGradeForm button[type="submit"]');
             submitBtn.textContent = 'خەزنکردنی نمرە';
             editingGradeId = null;
+            
+            // نوێکردنەوەی زانیاری قوتابی ئەگەر لە بەشی زانیاری قوتابیدایە
+            const studentName = document.getElementById('studentDetailName').textContent;
+            if (studentName && studentName !== '') {
+                const student = students.find(s => s.name === studentName);
+                if (student) {
+                    showStudentGrades(student);
+                }
+            }
+            
+            updateDashboard();
         }
 
         // فەنکشنی سڕینەوەی نمرە
@@ -1787,22 +1801,166 @@
                 return;
             }
             
-            // لە ڕاستیدا پێویستە لایبرێرییەکی PDF بەکاربهێنین
-            alert('هەناردەکردنی PDF بۆ نمرەکانی ' + studentName);
-            // لەم شوێنەدا کۆدی هەناردەکردنی PDF دابنێ
+            const student = students.find(s => s.name === studentName);
+            if (!student) {
+                alert('قوتابی نەدۆزرایەوە!');
+                return;
+            }
+            
+            const studentGrades = grades.filter(g => g.studentId === student.id);
+            
+            if (studentGrades.length === 0) {
+                alert('هیچ نمرەیەک بۆ ئەم قوتابیە نییە!');
+                return;
+            }
+            
+            // دروستکردنی ناوەڕۆکی PDF
+            let content = `
+                <h1 style="text-align: center; color: #4e73df;">ڕاپۆرتی نمرەکانی قوتابی</h1>
+                <h2 style="text-align: center;">${studentName}</h2>
+                <hr>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #4e73df; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">دەرس</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆتایی</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆی گشتی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            studentGrades.forEach(grade => {
+                content += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${grade.courseName}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.final60Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${grade.totalGrade}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: left;">
+                    <p><strong>بەرواری هەناردن:</strong> ${new Date().toLocaleDateString('ar-KU')}</p>
+                </div>
+            `;
+            
+            // دروستکردنی PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // زیادکردنی ناوەڕۆک بە شێوازی HTML
+            doc.html(content, {
+                callback: function(doc) {
+                    doc.save(`نمرەکانی_${studentName}.pdf`);
+                },
+                x: 10,
+                y: 10,
+                width: 190,
+                windowWidth: 800
+            });
         }
         
         // هەناردەکردنی نمرەکانی قوتابی بۆ PDF
         function exportStudentGradesToPdf() {
             const studentName = document.getElementById('studentDetailName').textContent;
-            if (!studentName) {
+            if (!studentName || studentName === '') {
                 alert('هیچ قوتابیەک هەڵنەبژێردراوە!');
                 return;
             }
             
-            // لە ڕاستیدا پێویستە لایبرێرییەکی PDF بەکاربهێنین
-            alert('هەناردەکردنی PDF بۆ نمرەکانی ' + studentName);
-            // لەم شوێنەدا کۆدی هەناردەکردنی PDF دابنێ
+            const student = students.find(s => s.name === studentName);
+            if (!student) {
+                alert('قوتابی نەدۆزرایەوە!');
+                return;
+            }
+            
+            const studentGrades = grades.filter(g => g.studentId === student.id);
+            
+            if (studentGrades.length === 0) {
+                alert('هیچ نمرەیەک بۆ ئەم قوتابیە نییە!');
+                return;
+            }
+            
+            // دروستکردنی ناوەڕۆکی PDF
+            let content = `
+                <div style="text-align: center;">
+                    <h1 style="color: #4e73df;">ڕاپۆرتی نمرەکانی قوتابی</h1>
+                    <h2>${studentName}</h2>
+                    <p><strong>ناوی باوک:</strong> ${student.fatherName}</p>
+                    <p><strong>قۆناغ:</strong> ${student.level} | <strong>گروپ:</strong> ${student.group}</p>
+                </div>
+                <hr>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #4e73df; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">دەرس</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆتایی</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆی گشتی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            let totalSum = 0;
+            studentGrades.forEach(grade => {
+                totalSum += grade.totalGrade;
+                content += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${grade.courseName}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.final60Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${grade.totalGrade}</td>
+                    </tr>
+                `;
+            });
+            
+            const average = totalSum / studentGrades.length;
+            
+            content += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; padding: 10px; background-color: #f8f9fc; border-radius: 5px;">
+                    <p style="text-align: center;"><strong>نمرەی تێکڕا:</strong> ${average.toFixed(2)}</p>
+                    <p style="text-align: center;"><strong>کۆی نمرەکان:</strong> ${studentGrades.length}</p>
+                </div>
+                <div style="margin-top: 20px; text-align: left;">
+                    <p><strong>بەرواری هەناردن:</strong> ${new Date().toLocaleDateString('ar-KU')}</p>
+                </div>
+            `;
+            
+            // دروستکردنی PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // زیادکردنی ناوەڕۆک بە شێوازی HTML
+            doc.html(content, {
+                callback: function(doc) {
+                    doc.save(`نمرەکانی_${studentName}.pdf`);
+                },
+                x: 10,
+                y: 10,
+                width: 190,
+                windowWidth: 800
+            });
         }
         
         // تەوگڵی تەنیشت
