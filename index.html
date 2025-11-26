@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #4e73df;
@@ -189,80 +188,13 @@
             border-radius: 10px;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
-
-        /* ئەنیمەیشنی چوونەژوورەوە */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-        
-        @keyframes blink {
-            0%, 50% { border-color: transparent }
-            51%, 100% { border-color: var(--primary) }
-        }
-        
-        .developer-text {
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
-            border-right: 2px solid var(--primary);
-            white-space: nowrap;
-            margin: 0 auto;
-            animation: typing 3.5s steps(40, end), blink 1s infinite;
-            color: var(--primary);
-            font-weight: bold;
-        }
-        
-        .login-container {
-            animation: fadeIn 1s ease-in;
-        }
-        
-        .logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .institute-logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .navbar-logo {
-            height: 40px;
-            margin-right: 10px;
-            border-radius: 5px;
-        }
-
-        .welcome-animation {
-            background: linear-gradient(45deg, var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <!-- پەڕەی چوونەژوورەوە -->
     <div id="loginPage" class="container">
         <div class="login-container">
-            <div class="logo-container">
-                <img src="https://via.placeholder.com/120x120/4e73df/ffffff?text=SIS" alt="لۆگۆی پەیمانگای سۆران" class="institute-logo" id="instituteLogo">
-                <h2 class="text-center mb-4 welcome-animation">سیستەمی پەیمانگای سۆران</h2>
-            </div>
-            
-            <!-- ئەنیمەیشنی نوسین -->
-            <div class="text-center mb-4">
-                <h4 class="developer-text" id="developerText"></h4>
-            </div>
-            
+            <h2 class="text-center mb-4">چوونەژوورەوە بۆ سیستەمی پەیمانگای سۆران</h2>
             <form id="loginForm">
                 <div class="mb-3">
                     <label for="username" class="form-label">ناوی بەکارهێنەر</label>
@@ -274,17 +206,6 @@
                 </div>
                 <button type="submit" class="btn btn-primary w-100">چوونەژوورەوە</button>
             </form>
-            
-            <!-- بارتەی لۆگۆ -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    گۆڕینی لۆگۆ
-                </div>
-                <div class="card-body">
-                    <input type="file" class="form-control" id="logoUpload" accept="image/*">
-                    <button class="btn btn-secondary mt-2 w-100" onclick="uploadLogo()">نوێکردنەوەی لۆگۆ</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -297,7 +218,7 @@
                     <i class="fa fa-bars"></i>
                 </button>
                 <a class="navbar-brand" href="#">
-                    <img src="" alt="لۆگۆ" class="navbar-logo" id="navbarLogo">
+                    <i class="fas fa-graduation-cap me-2"></i>
                     پەیمانگای سۆران
                 </a>
                 <ul class="navbar-nav ms-auto">
@@ -845,6 +766,20 @@
                                         <button class="btn btn-primary" id="restoreBtn">خوێندنەوەی بەکەپ</button>
                                     </div>
                                 </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        خوێندنەوەی زانیاری لە سیستەمی مامۆستا
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="teacherBackupFile" class="form-label">فایلی بەکەپی سیستەمی مامۆستا</label>
+                                            <input type="file" class="form-control" id="teacherBackupFile" accept=".json">
+                                        </div>
+                                        <button class="btn btn-primary" id="importTeacherBtn">خوێندنەوەی زانیاریەکانی غیاب</button>
+                                        <p class="text-muted mt-2">ئەم ئامرازە تەنها غیابەکان زیاد دەکات بۆ قوتابیەکانی سیستەمی پەیمانگا.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -863,64 +798,13 @@
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let editingStudentId = null;
         let editingGradeId = null;
-        let instituteLogo = localStorage.getItem('instituteLogo') || 'https://via.placeholder.com/120x120/4e73df/ffffff?text=SIS';
         
         // پاسوۆردی سەرەکی
         const systemPassword = "ashna1212";
         const systemUsername = "ashna";
         
-        // فەنکشنی نوێ بۆ بارکردنی لۆگۆ
-        function uploadLogo() {
-            const fileInput = document.getElementById('logoUpload');
-            if (fileInput.files.length === 0) {
-                alert('تکایە وێنەیەک هەڵبژێرە!');
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                instituteLogo = e.target.result;
-                localStorage.setItem('instituteLogo', instituteLogo);
-                updateLogo();
-                alert('لۆگۆ بە سەرکەوتوویی نوێکرایەوە!');
-            };
-            
-            reader.readAsDataURL(file);
-        }
-        
-        // فەنکشنی نوێکردنەوەی لۆگۆ
-        function updateLogo() {
-            document.getElementById('instituteLogo').src = instituteLogo;
-            document.getElementById('navbarLogo').src = instituteLogo;
-        }
-        
-        // فەنکشنی ئەنیمەیشنی نوسین
-        function typeDeveloperText() {
-            const text = "developer farzad warty";
-            const element = document.getElementById('developerText');
-            element.textContent = '';
-            
-            let i = 0;
-            const timer = setInterval(() => {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(timer);
-                }
-            }, 100);
-        }
-        
         // چێککردنی چوونەژوورەوە
         document.addEventListener('DOMContentLoaded', function() {
-            // دەستپێکردنی لۆگۆ
-            updateLogo();
-            
-            // دەستپێکردنی ئەنیمەیشن
-            setTimeout(typeDeveloperText, 1000);
-            
             if (currentUser) {
                 showMainPage();
                 displayStudentsList();
@@ -1055,6 +939,9 @@
             
             // خوێندنەوەی بەکەپ
             document.getElementById('restoreBtn').addEventListener('click', restoreData);
+            
+            // خوێندنەوەی زانیاری لە سیستەمی مامۆستا
+            document.getElementById('importTeacherBtn').addEventListener('click', importTeacherSystemBackup);
             
             // هەناردەکردنی PDF بۆ نمرەکان
             document.getElementById('exportGradesPdf').addEventListener('click', exportGradesToPdf);
@@ -1451,44 +1338,158 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
+                    let importedStudents = 0;
+                    let importedAttendance = 0;
+                    let updatedAttendance = 0;
                     
-                    // زیادکردنی زانیاریە نوێیەکان بە شێوەیەکی جیاواز
+                    // زیادکردنی قوتابیە نوێیەکان
                     if (data.students) {
-                        // تەنها قوتابیە نوێیەکان زیاد دەکەین
                         data.students.forEach(newStudent => {
                             if (!students.find(s => s.id === newStudent.id)) {
                                 students.push(newStudent);
+                                importedStudents++;
                             }
                         });
                     }
                     
-                    if (data.grades) {
-                        // تەنها نمرە نوێیەکان زیاد دەکەین
-                        data.grades.forEach(newGrade => {
-                            if (!grades.find(g => g.id === newGrade.id)) {
-                                grades.push(newGrade);
-                            }
-                        });
-                    }
-                    
+                    // زیادکردنی غیابەکان بە شێوازێکی زیرەک
                     if (data.attendance) {
-                        // تەنها غیابە نوێیەکان زیاد دەکەین
                         data.attendance.forEach(newAttendance => {
-                            if (!attendance.find(a => a.id === newAttendance.id)) {
-                                attendance.push(newAttendance);
+                            // پشکنین بۆ دۆزینەوەی قوتابی لە سیستەمی پەیمانگا
+                            const existingStudent = students.find(s => s.id === newAttendance.studentId);
+                            
+                            if (existingStudent) {
+                                // پشکنین بۆ دۆزینەوەی غیابی هاوشێوە
+                                const existingAttendanceIndex = attendance.findIndex(a => 
+                                    a.id === newAttendance.id || 
+                                    (a.studentId === newAttendance.studentId && 
+                                     a.date === newAttendance.date && 
+                                     a.courseName === newAttendance.course)
+                                );
+                                
+                                if (existingAttendanceIndex === -1) {
+                                    // زیادکردنی غیابی نوێ
+                                    attendance.push({
+                                        id: newAttendance.id,
+                                        studentId: newAttendance.studentId,
+                                        studentName: existingStudent.name,
+                                        courseName: newAttendance.course || newAttendance.courseName,
+                                        date: newAttendance.date,
+                                        hours: newAttendance.present === false ? (newAttendance.hours || 1) : 0
+                                    });
+                                    importedAttendance++;
+                                } else {
+                                    // نوێکردنەوەی غیابی هەبوو
+                                    attendance[existingAttendanceIndex] = {
+                                        ...attendance[existingAttendanceIndex],
+                                        courseName: newAttendance.course || newAttendance.courseName,
+                                        date: newAttendance.date,
+                                        hours: newAttendance.present === false ? (newAttendance.hours || 1) : 0
+                                    };
+                                    updatedAttendance++;
+                                }
                             }
                         });
                     }
                     
+                    // پاشەکەوتکردنی زانیاریە نوێیەکان
                     localStorage.setItem('students', JSON.stringify(students));
-                    localStorage.setItem('grades', JSON.stringify(grades));
                     localStorage.setItem('attendance', JSON.stringify(attendance));
                     
-                    alert('بەکەپ بە سەرکەوتوویی خوێندرایەوە!');
+                    // نیشاندانی ڕاپۆرت
+                    let report = `زانیاریەکان بە سەرکەوتوویی خوێندرایەوە!\n\n`;
+                    if (importedStudents > 0) report += `✅ ${importedStudents} قوتابی نوێ زیاد کرا\n`;
+                    if (importedAttendance > 0) report += `✅ ${importedAttendance} غیابی نوێ زیاد کرا\n`;
+                    if (updatedAttendance > 0) report += `✅ ${updatedAttendance} غیاب نوێکرایەوە\n`;
+                    
+                    if (importedStudents === 0 && importedAttendance === 0 && updatedAttendance === 0) {
+                        report += `ℹ️ ھیچ زانیاریەکی نوێ نەدۆزرایەوە`;
+                    }
+                    
+                    alert(report);
                     displayStudentsList();
                     updateDashboard();
                 } catch (error) {
                     alert('هەڵە لە خوێندنەوەی فایلی بەکەپ: ' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // خوێندنەوەی زانیاری لە سیستەمی مامۆستا
+        function importTeacherSystemBackup() {
+            const fileInput = document.getElementById('teacherBackupFile');
+            if (fileInput.files.length === 0) {
+                alert('تکایە فایلی بەکەپی سیستەمی مامۆستا هەڵبژێرە!');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedAttendance = 0;
+                    let skippedStudents = 0;
+                    
+                    // پشکنین بۆ زانیاریەکانی سیستەمی مامۆستا
+                    if (data.attendance) {
+                        data.attendance.forEach(teacherAttendance => {
+                            // گەڕان بەدوای قوتابی لە سیستەمی پەیمانگا بە ناو
+                            const existingStudent = students.find(s => 
+                                s.name === teacherAttendance.studentName
+                            );
+                            
+                            if (existingStudent) {
+                                // پشکنین بۆ دۆزینەوەی غیابی هاوشێوە
+                                const existingAttendanceIndex = attendance.findIndex(a => 
+                                    a.studentId === existingStudent.id && 
+                                    a.date === teacherAttendance.date && 
+                                    a.courseName === teacherAttendance.course
+                                );
+                                
+                                if (existingAttendanceIndex === -1 && teacherAttendance.present === false) {
+                                    // زیادکردنی غیابی نوێ تەنها ئەگەر قوتابی غیابی بووبێت
+                                    attendance.push({
+                                        id: `teacher-${teacherAttendance.id}`,
+                                        studentId: existingStudent.id,
+                                        studentName: existingStudent.name,
+                                        courseName: teacherAttendance.course,
+                                        date: teacherAttendance.date,
+                                        hours: 1, // سیستەمی مامۆستا کاتژمێر دیاری ناکات
+                                        source: 'سیستەمی مامۆستا'
+                                    });
+                                    importedAttendance++;
+                                }
+                            } else {
+                                skippedStudents++;
+                            }
+                        });
+                    }
+                    
+                    // پاشەکەوتکردنی زانیاریە نوێیەکان
+                    localStorage.setItem('attendance', JSON.stringify(attendance));
+                    
+                    // نیشاندانی ڕاپۆرت
+                    let report = `زانیاریەکانی سیستەمی مامۆستا بە سەرکەوتوویی خوێندرایەوە!\n\n`;
+                    if (importedAttendance > 0) report += `✅ ${importedAttendance} غیابی نوێ زیاد کرا\n`;
+                    if (skippedStudents > 0) report += `❌ ${skippedStudents} غیاب پشتگوێ خران (قوتابی نەدۆزرایەوە)\n`;
+                    
+                    alert(report);
+                    updateDashboard();
+                    
+                    // نوێکردنەوەی زانیاری قوتابی ئەگەر لە بەشی زانیاری قوتابیدایە
+                    const currentStudentName = document.getElementById('studentDetailName').textContent;
+                    if (currentStudentName && currentStudentName !== '') {
+                        const student = students.find(s => s.name === currentStudentName);
+                        if (student) {
+                            showStudentAttendance(student);
+                        }
+                    }
+                } catch (error) {
+                    alert('هەڵە لە خوێندنەوەی فایلی سیستەمی مامۆستا: ' + error.message);
                 }
             };
             
@@ -1608,6 +1609,7 @@
                             <th>بەروار</th>
                             <th>دەرس</th>
                             <th>کاتژمێر</th>
+                            <th>سەرچاوە</th>
                             <th>کردارەکان</th>
                         </tr>
                     </thead>
@@ -1620,6 +1622,7 @@
                         <td>${a.date}</td>
                         <td>${a.courseName}</td>
                         <td>${a.hours}</td>
+                        <td>${a.source || 'سیستەمی پەیمانگا'}</td>
                         <td>
                             <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')">
                                 <i class="fas fa-trash"></i>
@@ -1651,6 +1654,7 @@
                             <th>بەروار</th>
                             <th>دەرس</th>
                             <th>کاتژمێر</th>
+                            <th>سەرچاوە</th>
                             <th>کردارەکان</th>
                         </tr>
                     </thead>
@@ -1663,6 +1667,7 @@
                         <td>${a.date}</td>
                         <td>${a.courseName}</td>
                         <td>${a.hours}</td>
+                        <td>${a.source || 'سیستەمی پەیمانگا'}</td>
                         <td>
                             <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')">
                                 <i class="fas fa-trash"></i>
@@ -1923,7 +1928,7 @@
             }
         }
         
-        // فەنکشنی نوێ بۆ هەناردەکردنی PDF
+        // هەناردەکردنی نمرەکان بۆ PDF
         function exportGradesToPdf() {
             const studentName = document.getElementById('gradeStudentName').value;
             if (!studentName) {
@@ -1944,88 +1949,65 @@
                 return;
             }
             
-            // دروستکردنی ناوەڕۆکی PDF بە شێوازی باشتر
+            // دروستکردنی ناوەڕۆکی PDF
+            let content = `
+                <h1 style="text-align: center; color: #4e73df;">ڕاپۆرتی نمرەکانی قوتابی</h1>
+                <h2 style="text-align: center;">${studentName}</h2>
+                <hr>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #4e73df; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">دەرس</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆتایی</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆی گشتی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            studentGrades.forEach(grade => {
+                content += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${grade.courseName}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.final60Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${grade.totalGrade}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: left;">
+                    <p><strong>بەرواری هەناردن:</strong> ${new Date().toLocaleDateString('ar-KU')}</p>
+                </div>
+            `;
+            
+            // دروستکردنی PDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // پاشەکەوتکردنی ڕەنگی سەرەکی
-            const primaryColor = [78, 115, 223];
-            
-            // سەرپەڕە
-            doc.setFillColor(...primaryColor);
-            doc.rect(0, 0, 210, 40, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(20);
-            doc.text('ڕاپۆرتی نمرەکانی قوتابی', 105, 20, { align: 'center' });
-            
-            doc.setFontSize(16);
-            doc.text(studentName, 105, 30, { align: 'center' });
-            
-            // زانیاری قوتابی
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            let yPosition = 60;
-            
-            doc.text(`ناوی باوک: ${student.fatherName}`, 20, yPosition);
-            doc.text(`قۆناغ: ${student.level}`, 150, yPosition);
-            yPosition += 10;
-            
-            doc.text(`ناوی باپیر: ${student.grandfatherName}`, 20, yPosition);
-            doc.text(`گروپ: ${student.group}`, 150, yPosition);
-            yPosition += 20;
-            
-            // سەرپەڕەی خشتە
-            doc.setFillColor(...primaryColor);
-            doc.rect(20, yPosition, 170, 10, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(10);
-            doc.text('دەرس', 180, yPosition + 7, { align: 'right' });
-            doc.text('15ی یەکەم', 150, yPosition + 7, { align: 'center' });
-            doc.text('5ی یەکەم', 130, yPosition + 7, { align: 'center' });
-            doc.text('15ی دووەم', 110, yPosition + 7, { align: 'center' });
-            doc.text('5ی دووەم', 90, yPosition + 7, { align: 'center' });
-            doc.text('کۆتایی', 70, yPosition + 7, { align: 'center' });
-            doc.text('کۆی گشتی', 50, yPosition + 7, { align: 'center' });
-            
-            yPosition += 15;
-            doc.setTextColor(0, 0, 0);
-            
-            // نمرەکان
-            let totalSum = 0;
-            studentGrades.forEach(grade => {
-                if (yPosition > 270) {
-                    doc.addPage();
-                    yPosition = 20;
-                }
-                
-                doc.text(grade.courseName, 180, yPosition, { align: 'right' });
-                doc.text(grade.first15Grade.toString(), 150, yPosition, { align: 'center' });
-                doc.text(grade.first5Grade.toString(), 130, yPosition, { align: 'center' });
-                doc.text(grade.second15Grade.toString(), 110, yPosition, { align: 'center' });
-                doc.text(grade.second5Grade.toString(), 90, yPosition, { align: 'center' });
-                doc.text(grade.final60Grade.toString(), 70, yPosition, { align: 'center' });
-                doc.text(grade.totalGrade.toString(), 50, yPosition, { align: 'center' });
-                
-                totalSum += grade.totalGrade;
-                yPosition += 10;
+            // زیادکردنی ناوەڕۆک بە شێوازی HTML
+            doc.html(content, {
+                callback: function(doc) {
+                    doc.save(`نمرەکانی_${studentName}.pdf`);
+                },
+                x: 10,
+                y: 10,
+                width: 190,
+                windowWidth: 800
             });
-            
-            // کۆتایی
-            yPosition += 10;
-            const average = totalSum / studentGrades.length;
-            
-            doc.setFillColor(248, 249, 252);
-            doc.rect(20, yPosition, 170, 20, 'F');
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            doc.text(`نمرەی تێکڕا: ${average.toFixed(2)}`, 105, yPosition + 8, { align: 'center' });
-            doc.text(`کۆی نمرەکان: ${studentGrades.length}`, 105, yPosition + 15, { align: 'center' });
-            
-            // پاشەکەوتکردن
-            doc.save(`نمرەکانی_${studentName}.pdf`);
         }
-
-        // فەنکشنی هەناردەکردنی نمرەکانی قوتابی بۆ PDF
+        
+        // هەناردەکردنی نمرەکانی قوتابی بۆ PDF
         function exportStudentGradesToPdf() {
             const studentName = document.getElementById('studentDetailName').textContent;
             if (!studentName || studentName === '') {
@@ -2047,79 +2029,73 @@
             }
             
             // دروستکردنی ناوەڕۆکی PDF
+            let content = `
+                <div style="text-align: center;">
+                    <h1 style="color: #4e73df;">ڕاپۆرتی نمرەکانی قوتابی</h1>
+                    <h2>${studentName}</h2>
+                    <p><strong>ناوی باوک:</strong> ${student.fatherName}</p>
+                    <p><strong>قۆناغ:</strong> ${student.level} | <strong>گروپ:</strong> ${student.group}</p>
+                </div>
+                <hr>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #4e73df; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">دەرس</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی یەکەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">15ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5ی دووەم</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆتایی</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">کۆی گشتی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            let totalSum = 0;
+            studentGrades.forEach(grade => {
+                totalSum += grade.totalGrade;
+                content += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${grade.courseName}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.first5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second15Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.second5Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${grade.final60Grade}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${grade.totalGrade}</td>
+                    </tr>
+                `;
+            });
+            
+            const average = totalSum / studentGrades.length;
+            
+            content += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; padding: 10px; background-color: #f8f9fc; border-radius: 5px;">
+                    <p style="text-align: center;"><strong>نمرەی تێکڕا:</strong> ${average.toFixed(2)}</p>
+                    <p style="text-align: center;"><strong>کۆی نمرەکان:</strong> ${studentGrades.length}</p>
+                </div>
+                <div style="margin-top: 20px; text-align: left;">
+                    <p><strong>بەرواری هەناردن:</strong> ${new Date().toLocaleDateString('ar-KU')}</p>
+                </div>
+            `;
+            
+            // دروستکردنی PDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // پاشەکەوتکردنی ڕەنگی سەرەکی
-            const primaryColor = [78, 115, 223];
-            
-            // سەرپەڕە
-            doc.setFillColor(...primaryColor);
-            doc.rect(0, 0, 210, 50, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(20);
-            doc.text('ڕاپۆرتی نمرەکانی قوتابی', 105, 25, { align: 'center' });
-            
-            // زانیاری قوتابی
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            let yPosition = 70;
-            
-            doc.text(`ناوی قوتابی: ${studentName}`, 20, yPosition);
-            doc.text(`ناوی باوک: ${student.fatherName}`, 20, yPosition + 8);
-            doc.text(`قۆناغ: ${student.level} - گروپ: ${student.group}`, 20, yPosition + 16);
-            
-            yPosition += 30;
-            
-            // سەرپەڕەی خشتە
-            doc.setFillColor(...primaryColor);
-            doc.rect(20, yPosition, 170, 10, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(10);
-            doc.text('دەرس', 180, yPosition + 7, { align: 'right' });
-            doc.text('15ی یەکەم', 150, yPosition + 7, { align: 'center' });
-            doc.text('5ی یەکەم', 130, yPosition + 7, { align: 'center' });
-            doc.text('15ی دووەم', 110, yPosition + 7, { align: 'center' });
-            doc.text('5ی دووەم', 90, yPosition + 7, { align: 'center' });
-            doc.text('کۆتایی', 70, yPosition + 7, { align: 'center' });
-            doc.text('کۆی گشتی', 50, yPosition + 7, { align: 'center' });
-            
-            yPosition += 15;
-            doc.setTextColor(0, 0, 0);
-            
-            // نمرەکان
-            let totalSum = 0;
-            studentGrades.forEach(grade => {
-                if (yPosition > 270) {
-                    doc.addPage();
-                    yPosition = 20;
-                }
-                
-                doc.text(grade.courseName, 180, yPosition, { align: 'right' });
-                doc.text(grade.first15Grade.toString(), 150, yPosition, { align: 'center' });
-                doc.text(grade.first5Grade.toString(), 130, yPosition, { align: 'center' });
-                doc.text(grade.second15Grade.toString(), 110, yPosition, { align: 'center' });
-                doc.text(grade.second5Grade.toString(), 90, yPosition, { align: 'center' });
-                doc.text(grade.final60Grade.toString(), 70, yPosition, { align: 'center' });
-                doc.text(grade.totalGrade.toString(), 50, yPosition, { align: 'center' });
-                
-                totalSum += grade.totalGrade;
-                yPosition += 10;
+            // زیادکردنی ناوەڕۆک بە شێوازی HTML
+            doc.html(content, {
+                callback: function(doc) {
+                    doc.save(`نمرەکانی_${studentName}.pdf`);
+                },
+                x: 10,
+                y: 10,
+                width: 190,
+                windowWidth: 800
             });
-            
-            // کۆتایی
-            yPosition += 10;
-            const average = totalSum / studentGrades.length;
-            
-            doc.setFillColor(248, 249, 252);
-            doc.rect(20, yPosition, 170, 25, 'F');
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            doc.text(`نمرەی تێکڕا: ${average.toFixed(2)}`, 105, yPosition + 10, { align: 'center' });
-            doc.text(`کۆی نمرەکان: ${studentGrades.length}`, 105, yPosition + 18, { align: 'center' });
-            
-            // پاشەکەوتکردن
-            doc.save(`نمرەکانی_${studentName}.pdf`);
         }
         
         // تەوگڵی تەنیشت
