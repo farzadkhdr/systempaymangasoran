@@ -695,7 +695,7 @@
                                 <button class="btn btn-sm btn-primary" id="viewAllAttendance">بینینی هەموو غیابەکان</button> 
                             </div> 
                             <div class="card-body"> 
-                                <p><strong>کۆی گشتی غیاب:</strong> <span id="totalStudentAbsences">0</span> کاتژمێر</p> 
+                                <p><strong>کۆی گشتی غیاب:</strong> <span id="totalStudentAbsences">0</span> جار</p> 
                                 <div id="attendanceList"></div> 
                             </div> 
                         </div> 
@@ -1596,47 +1596,47 @@
         // نیشاندانی زانیاری غیابی قوتابی 
         function showStudentAttendance(student) { 
             const studentAttendance = attendance.filter(a => a.studentId === student.id); 
-            const totalHours = studentAttendance.reduce((sum, a) => sum + a.hours, 0); 
-             
-            document.getElementById('totalStudentAbsences').textContent = totalHours; 
-             
-            // نیشاندانی 5 غیابی کۆتایی 
-            const recentAttendance = studentAttendance.slice(-5); 
-            let attendanceHTML = ` 
-                <table class="table table-striped"> 
-                    <thead> 
-                        <tr> 
-                            <th>بەروار</th> 
-                            <th>دەرس</th> 
-                            <th>کاتژمێر</th> 
-                            <th>سەرچاوە</th> 
-                            <th>کردارەکان</th> 
-                        </tr> 
-                    </thead> 
-                    <tbody> 
-            `; 
-             
-            recentAttendance.forEach(a => { 
-                attendanceHTML += ` 
-                    <tr> 
-                        <td>${a.date}</td> 
-                        <td>${a.courseName}</td> 
-                        <td>${a.hours}</td> 
-                        <td>${a.source || 'سیستەمی پەیمانگا'}</td> 
-                        <td> 
-                            <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')"> 
-                                <i class="fas fa-trash"></i> 
-                            </button> 
-                        </td> 
-                    </tr> 
-                `; 
-            }); 
-             
-            attendanceHTML += '</tbody></table>'; 
-             
-            document.getElementById('attendanceList').innerHTML = attendanceHTML; 
-            document.getElementById('studentAttendanceCard').style.display = 'block'; 
-        } 
+            
+            // لێرە گۆڕانکاریەکە: کۆی ژمارەی غیابەکان نەک کاتژمێر
+            const totalAbsences = studentAttendance.length;
+            
+            document.getElementById('totalStudentAbsences').textContent = totalAbsences;
+            
+            // نیشاندانی 5 غیابی کۆتایی
+            const recentAttendance = studentAttendance.slice(-5);
+            let attendanceHTML = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>بەروار</th>
+                            <th>دەرس</th>
+                            <th>سەرچاوە</th>
+                            <th>کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            recentAttendance.forEach(a => {
+                attendanceHTML += `
+                    <tr>
+                        <td>${a.date}</td>
+                        <td>${a.courseName}</td>
+                        <td>${a.source || 'سیستەمی پەیمانگا'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            attendanceHTML += '</tbody></table>';
+            
+            document.getElementById('attendanceList').innerHTML = attendanceHTML;
+            document.getElementById('studentAttendanceCard').style.display = 'block';
+        }
          
         // نیشاندانی هەموو غیابەکان 
         function viewAllAttendance() { 
@@ -1653,7 +1653,6 @@
                         <tr> 
                             <th>بەروار</th> 
                             <th>دەرس</th> 
-                            <th>کاتژمێر</th> 
                             <th>سەرچاوە</th> 
                             <th>کردارەکان</th> 
                         </tr> 
@@ -1666,7 +1665,6 @@
                     <tr> 
                         <td>${a.date}</td> 
                         <td>${a.courseName}</td> 
-                        <td>${a.hours}</td> 
                         <td>${a.source || 'سیستەمی پەیمانگا'}</td> 
                         <td> 
                             <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')"> 
