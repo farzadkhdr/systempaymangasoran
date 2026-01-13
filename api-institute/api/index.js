@@ -1,0 +1,21 @@
+{
+  "name": "soran-institute-api",
+  "version": "1.0.0",
+  "description": "API Server for Soran Institute System",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
